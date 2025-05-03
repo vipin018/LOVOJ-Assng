@@ -8,6 +8,20 @@
     <link rel="stylesheet" href="/src/style.css">
   </head>
   <body>
+    <div class="controls">
+      <button id="toggleShadows">Toggle Shadows</button>
+      <button id="increaseGloss">Glossy</button>
+      <button id="increaseRough">Rough</button>
+    
+      <button id="frontView">Front View</button>
+      <button id="backView">Back View</button>
+    
+      <div>
+        <label>Light Intensity:</label>
+        <input id="lightIntensity" type="range" min="0" max="10" step="0.1" value="1">
+      </div>
+    </div>
+    
     <canvas id="canvas"></canvas>
     <script type="module" src="/src/main.js"></script>
   </body>
