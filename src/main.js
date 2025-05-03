@@ -25,7 +25,6 @@ scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(1, 2, 2);
-directionalLight.target.position.set(0, 0, 0);
 directionalLight.castShadow = true;
 scene.add(directionalLight);
 
@@ -47,11 +46,18 @@ window.addEventListener('dblclick', () => {
 
 // Texture loading
 const textureLoader = new THREE.TextureLoader();
-const texture = textureLoader.load('/textures/texture3.png');
-texture.colorSpace = THREE.SRGBColorSpace;
-texture.wrapS = THREE.RepeatWrapping;
-texture.wrapT = THREE.RepeatWrapping;
-texture.repeat.set(1, 1);
+
+const texture2 = textureLoader.load('/textures/texture.png');
+texture2.colorSpace = THREE.SRGBColorSpace;
+texture2.wrapS = THREE.RepeatWrapping;
+texture2.wrapT = THREE.RepeatWrapping;
+texture2.repeat.set(1, 1);
+
+const texture3 = textureLoader.load('/textures/texture3.png');
+texture3.colorSpace = THREE.SRGBColorSpace;
+texture3.wrapS = THREE.RepeatWrapping;
+texture3.wrapT = THREE.RepeatWrapping;
+texture3.repeat.set(1, 1);
 
 // Env Map
 const cubeTextureLoader = new THREE.CubeTextureLoader();
@@ -93,7 +99,6 @@ loader.load('/model/can.glb', (gltf) => {
   model = gltf.scene;
   model.scale.set(0.5, 0.5, 0.5);
   model.position.set(0, -0.5, 0);
-
   model.traverse((child) => {
     if (child.isMesh) {
       child.castShadow = true;
@@ -102,7 +107,7 @@ loader.load('/model/can.glb', (gltf) => {
         color: 0xffffff,
         metalness: 0.5,
         roughness: 0.7,
-        map: texture,
+        map: texture2,
         envMap: envMap,
         envMapIntensity: 1.2,
         clearcoat: 0.4,
@@ -113,7 +118,6 @@ loader.load('/model/can.glb', (gltf) => {
       modelMaterials.push(child.material);
     }
   });
-
   scene.add(model);
 });
 
@@ -131,9 +135,10 @@ const glossyBtn = document.getElementById('increaseGloss');
 const roughBtn = document.getElementById('increaseRough');
 const frontBtn = document.getElementById('frontView');
 const backBtn = document.getElementById('backView');
-const intensitySlider = document.getElementById('lightIntensity');
 const colorInput = document.getElementById('colorInput');
 const rotationToggle = document.getElementById('rotationToggle');
+const texture1Btn = document.getElementById('texture1');
+const texture2Btn = document.getElementById('texture2');
 
 // Event Listeners
 if (toggleBtn) {
@@ -187,23 +192,17 @@ if (roughBtn) {
   });
 }
 
-if (frontBtn) {
-  frontBtn.addEventListener('click', () => {
-    camera.position.set(0, 2, 3);
-    controls.target.set(0, 1, 0);
-  });
-}
-
 if (backBtn) {
   backBtn.addEventListener('click', () => {
-    camera.position.set(0, 2, -3);
+    camera.position.set(0, 1, 3);
     controls.target.set(0, 1, 0);
   });
 }
 
-if (intensitySlider) {
-  intensitySlider.addEventListener('input', (e) => {
-    directionalLight.intensity = parseFloat(e.target.value);
+if (frontBtn) {
+  frontBtn.addEventListener('click', () => {
+    camera.position.set(0, 1, -3);
+    controls.target.set(0, 1, 0);
   });
 }
 
@@ -221,5 +220,24 @@ if (rotationToggle) {
       camera.position.copy(defaultCameraPosition);
       controls.target.set(0, 0, 0);
     }
+  });
+}
+
+// 🌟 Texture Switching via Image Buttons
+if (texture1Btn) {
+  texture1Btn.addEventListener('click', () => {
+    modelMaterials.forEach((mat) => {
+      mat.map = texture2;
+      mat.needsUpdate = true;
+    });
+  });
+}
+
+if (texture2Btn) {
+  texture2Btn.addEventListener('click', () => {
+    modelMaterials.forEach((mat) => {
+      mat.map = texture3;
+      mat.needsUpdate = true;
+    });
   });
 }

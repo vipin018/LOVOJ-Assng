@@ -1,13 +1,12 @@
 * {
-padding: 0;
-margin: 0;
-box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
-html,
-body {
-height: 100%;
-width: 100%;
-background-color: #343434;
+html, body {
+  height: 100%;
+  width: 100%;
+  background-color: #343434;
 }
 
 canvas {
@@ -36,4 +35,23 @@ canvas {
   backdrop-filter: blur(5px);
   cursor: pointer;
   border-radius: 5px;
+}
+
+.texture-thumbnails {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.texture-thumbnails img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border: 2px solid #fff;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: transform 0.2s ease;
+}
+.texture-thumbnails img:hover {
+  transform: scale(1.05);
 }
