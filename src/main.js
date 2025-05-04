@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { GUI } from 'lil-gui';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xafafaf);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(-2, 3, 2);
+// camera.position.set(0, 1, 2);
+camera.position.set(0.5, 1, -4);
 const defaultCameraPosition = camera.position.clone();
 
 const canvas = document.querySelector('#canvas');
@@ -74,8 +74,6 @@ plane.position.y = -0.5;
 plane.receiveShadow = true;
 scene.add(plane);
 
-// GUI
-const gui = new GUI();
 
 // Controls
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -159,7 +157,7 @@ if (glossyBtn) {
     modelMaterials.forEach((mat) => {
       Object.assign(mat, {
         metalness: 0.7,
-        roughness: 0.1,
+        roughness: 0.2,
         clearcoat: 1.0,
         clearcoatRoughness: 0.0,
         reflectivity: 1.0,
