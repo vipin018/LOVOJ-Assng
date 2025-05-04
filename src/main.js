@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-
+import gsap from 'gsap';
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xafafaf);
 
@@ -172,7 +172,8 @@ if (toggleBtn) {
 if (glossyBtn) {
   glossyBtn.addEventListener('click', () => {
     modelMaterials.forEach((mat) => {
-      Object.assign(mat, {
+      gsap.to(mat, {
+        duration: 1,
         metalness: 0.7,
         roughness: 0.2,
         clearcoat: 1.0,
@@ -180,7 +181,7 @@ if (glossyBtn) {
         reflectivity: 1.0,
         ior: 1.6,
         envMapIntensity: 2.0,
-        needsUpdate: true,
+        onUpdate: () => { mat.needsUpdate = true; }
       });
     });
   });
@@ -189,7 +190,8 @@ if (glossyBtn) {
 if (roughBtn) {
   roughBtn.addEventListener('click', () => {
     modelMaterials.forEach((mat) => {
-      Object.assign(mat, {
+      gsap.to(mat, {
+        duration: 1,
         metalness: 0.0,
         roughness: 1.0,
         clearcoat: 0.0,
@@ -197,41 +199,47 @@ if (roughBtn) {
         reflectivity: 0.0,
         ior: 1.0,
         envMapIntensity: 0.5,
-        needsUpdate: true,
+        onUpdate: () => { mat.needsUpdate = true; }
       });
     });
   });
 }
 
+
 if (frontBtn) {
   frontBtn.addEventListener('click', () => {
-    if (window.innerWidth < 768) {
-      camera.position.set(0.5, 1, -5);
-    } else {
-      camera.position.set(0, 1, -3);
-    }
-    controls.target.set(0, 1, 0);
-    controls.update();
+    const camPos = window.innerWidth < 768 ? { x: 0.5, y: 1, z: -5 } : { x: 0, y: 1, z: -5 };
+    gsap.to(camera.position, {
+      duration: 1,
+      ...camPos,
+      onUpdate: () => controls.update()
+    });
   });
 }
 
 if (backBtn) {
   backBtn.addEventListener('click', () => {
-    if (window.innerWidth < 768) {
-      camera.position.set(0.5, 1, 5);
-    } else {
-      camera.position.set(0, 1, 3);
-    }
-    controls.target.set(0, 1, 0);
-    controls.update();
+    const camPos = window.innerWidth < 768 ? { x: 0.5, y: 1, z: 5 } : { x: 0, y: 1, z: 5 };
+    gsap.to(camera.position, {
+      duration: 1,
+      ...camPos,
+      onUpdate: () => controls.update()
+    });
   });
 }
 
+
 if (colorInput) {
   colorInput.addEventListener('input', (e) => {
-    modelMaterials.forEach((mat) => mat.color.set(e.target.value));
+    modelMaterials.forEach((mat) => {
+      gsap.to(mat.color, {
+        duration: 0.5,
+        ...new THREE.Color(e.target.value)
+      });
+    });
   });
 }
+
 
 if (rotationToggle) {
   rotationToggle.addEventListener('click', () => {
@@ -239,30 +247,39 @@ if (rotationToggle) {
     controls.enableRotate = allowRotation;
     if (!allowRotation) {
       const pos = window.innerWidth < 768 ? defaultMobileCamPos : defaultDesktopCamPos;
-      camera.position.copy(pos);
-      controls.target.set(0, 0, 0);
-      controls.update();
+      gsap.to(camera.position, {
+        duration: 1,
+        x: pos.x, y: pos.y, z: pos.z,
+        onUpdate: () => controls.update()
+      });
+      gsap.to(controls.target, {
+        duration: 1,
+        x: 0, y: 0, z: 0,
+        onUpdate: () => controls.update()
+      });
     }
   });
 }
 
+
 if (tileXInput) {
   tileXInput.addEventListener('input', () => {
-    texture.repeat.x = parseFloat(tileXInput.value);
+    gsap.to(texture.repeat, { duration: 0.5, x: parseFloat(tileXInput.value) });
   });
 }
 
 if (tileYInput) {
   tileYInput.addEventListener('input', () => {
-    texture.repeat.y = parseFloat(tileYInput.value);
+    gsap.to(texture.repeat, { duration: 0.5, y: parseFloat(tileYInput.value) });
   });
 }
 
 if (rotationInput) {
   rotationInput.addEventListener('input', () => {
-    texture.rotation = parseFloat(rotationInput.value);
+    gsap.to(texture, { duration: 0.5, rotation: parseFloat(rotationInput.value) });
   });
 }
+
 
 const toggle = document.querySelector(".dropdown-toggle");
 const controlsMenu = document.querySelector(".controls");
