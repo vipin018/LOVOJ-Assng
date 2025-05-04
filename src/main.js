@@ -5,11 +5,6 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xafafaf);
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-// camera.position.set(0, 1, 2);
-camera.position.set(0.5, 1, -4);
-const defaultCameraPosition = camera.position.clone();
-
 const canvas = document.querySelector('#canvas');
 const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -18,6 +13,17 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.5;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+scene.add(camera);
+
+const isMobile = window.innerWidth < 768;
+const defaultDesktopCamPos = new THREE.Vector3(0.5, 1, -4);
+const defaultMobileCamPos = new THREE.Vector3(0.5, 1, -5);
+
+// set initial camera pos
+camera.position.copy(isMobile ? defaultMobileCamPos : defaultDesktopCamPos);
+const defaultCameraPosition = camera.position.clone();
 
 // Lights
 const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
@@ -38,20 +44,30 @@ window.addEventListener('resize', () => {
 
 // Fullscreen toggle
 window.addEventListener('dblclick', () => {
-  if (!document.fullscreenElement) {
+  if (!document.fullscreenElement && canvas.requestFullscreen) {
     canvas.requestFullscreen();
-  } else {
+  } else if (document.fullscreenElement) {
     document.exitFullscreen();
   }
 });
 
 // Texture loading
 const textureLoader = new THREE.TextureLoader();
+
 const texture = textureLoader.load('/textures/texture2.png');
 texture.colorSpace = THREE.SRGBColorSpace;
 texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
 texture.repeat.set(1, 1);
+texture.center.set(0.5, 0.5);
+
+const texture2 = textureLoader.load('/textures/texture2.png');
+texture2.colorSpace = THREE.SRGBColorSpace;
+texture2.wrapS = THREE.RepeatWrapping;
+texture2.wrapT = THREE.RepeatWrapping;
+texture2.repeat.set(1, 1);
+texture2.center.set(0.5, 0.5);
+
 
 // Env Map
 const cubeTextureLoader = new THREE.CubeTextureLoader();
@@ -74,7 +90,6 @@ plane.position.y = -0.5;
 plane.receiveShadow = true;
 scene.add(plane);
 
-
 // Controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -91,7 +106,6 @@ loader.load('/model/can.glb', (gltf) => {
   model = gltf.scene;
   model.scale.set(0.5, 0.5, 0.5);
   model.position.set(0, -0.5, 0);
-  // model.rotation.y = Math.PI *0.5;
   model.traverse((child) => {
     if (child.isMesh) {
       child.castShadow = true;
@@ -131,8 +145,11 @@ const frontBtn = document.getElementById('frontView');
 const backBtn = document.getElementById('backView');
 const colorInput = document.getElementById('colorInput');
 const rotationToggle = document.getElementById('rotationToggle');
-const texture1Btn = document.getElementById('texture1');
-const texture2Btn = document.getElementById('texture2');
+const tileXInput = document.getElementById('tileX');
+const tileYInput = document.getElementById('tileY');
+const rotationInput = document.getElementById('rotation');
+const texture1Btn = document.getElementById('texture1Btn');
+const texture2Btn = document.getElementById('texture2Btn');
 
 // Event Listeners
 if (toggleBtn) {
@@ -186,17 +203,27 @@ if (roughBtn) {
   });
 }
 
-if (backBtn) {
-  backBtn.addEventListener('click', () => {
-    camera.position.set(0, 1, 3);
+if (frontBtn) {
+  frontBtn.addEventListener('click', () => {
+    if (window.innerWidth < 768) {
+      camera.position.set(0.5, 1, -5);
+    } else {
+      camera.position.set(0, 1, -3);
+    }
     controls.target.set(0, 1, 0);
+    controls.update();
   });
 }
 
-if (frontBtn) {
-  frontBtn.addEventListener('click', () => {
-    camera.position.set(0, 1, -3);
+if (backBtn) {
+  backBtn.addEventListener('click', () => {
+    if (window.innerWidth < 768) {
+      camera.position.set(0.5, 1, -5);
+    } else {
+      camera.position.set(0, 1, 3);
+    }
     controls.target.set(0, 1, 0);
+    controls.update();
   });
 }
 
@@ -211,8 +238,10 @@ if (rotationToggle) {
     allowRotation = !allowRotation;
     controls.enableRotate = allowRotation;
     if (!allowRotation) {
-      camera.position.copy(defaultCameraPosition);
+      const pos = window.innerWidth < 768 ? defaultMobileCamPos : defaultDesktopCamPos;
+      camera.position.copy(pos);
       controls.target.set(0, 0, 0);
+      controls.update();
     }
   });
 }
@@ -234,3 +263,28 @@ if (texture2Btn) {
     });
   });
 }
+
+if (tileXInput) {
+  tileXInput.addEventListener('input', () => {
+    texture.repeat.x = parseFloat(tileXInput.value);
+  });
+}
+
+if (tileYInput) {
+  tileYInput.addEventListener('input', () => {
+    texture.repeat.y = parseFloat(tileYInput.value);
+  });
+}
+
+if (rotationInput) {
+  rotationInput.addEventListener('input', () => {
+    texture.rotation = parseFloat(rotationInput.value);
+  });
+}
+
+const toggle = document.querySelector(".dropdown-toggle");
+const controlsMenu = document.querySelector(".controls");
+
+toggle.addEventListener("click", () => {
+  controlsMenu.classList.toggle("show");
+});
