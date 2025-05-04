@@ -25,6 +25,7 @@ scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(1, 2, 2);
+directionalLight.target.position.set(0, 0, 0);
 directionalLight.castShadow = true;
 scene.add(directionalLight);
 
@@ -46,18 +47,11 @@ window.addEventListener('dblclick', () => {
 
 // Texture loading
 const textureLoader = new THREE.TextureLoader();
-
-const texture2 = textureLoader.load('/textures/texture.png');
-texture2.colorSpace = THREE.SRGBColorSpace;
-texture2.wrapS = THREE.RepeatWrapping;
-texture2.wrapT = THREE.RepeatWrapping;
-texture2.repeat.set(1, 1);
-
-const texture3 = textureLoader.load('/textures/texture3.png');
-texture3.colorSpace = THREE.SRGBColorSpace;
-texture3.wrapS = THREE.RepeatWrapping;
-texture3.wrapT = THREE.RepeatWrapping;
-texture3.repeat.set(1, 1);
+const texture = textureLoader.load('/textures/texture2.png');
+texture.colorSpace = THREE.SRGBColorSpace;
+texture.wrapS = THREE.RepeatWrapping;
+texture.wrapT = THREE.RepeatWrapping;
+texture.repeat.set(1, 1);
 
 // Env Map
 const cubeTextureLoader = new THREE.CubeTextureLoader();
@@ -99,6 +93,7 @@ loader.load('/model/can.glb', (gltf) => {
   model = gltf.scene;
   model.scale.set(0.5, 0.5, 0.5);
   model.position.set(0, -0.5, 0);
+  // model.rotation.y = Math.PI *0.5;
   model.traverse((child) => {
     if (child.isMesh) {
       child.castShadow = true;
@@ -107,7 +102,7 @@ loader.load('/model/can.glb', (gltf) => {
         color: 0xffffff,
         metalness: 0.5,
         roughness: 0.7,
-        map: texture2,
+        map: texture,
         envMap: envMap,
         envMapIntensity: 1.2,
         clearcoat: 0.4,
@@ -118,6 +113,7 @@ loader.load('/model/can.glb', (gltf) => {
       modelMaterials.push(child.material);
     }
   });
+
   scene.add(model);
 });
 
@@ -223,7 +219,6 @@ if (rotationToggle) {
   });
 }
 
-// 🌟 Texture Switching via Image Buttons
 if (texture1Btn) {
   texture1Btn.addEventListener('click', () => {
     modelMaterials.forEach((mat) => {
