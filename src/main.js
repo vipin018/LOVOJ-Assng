@@ -281,9 +281,9 @@ if (rotationInput) {
 }
 
 
-const toggle = document.querySelector(".dropdown-toggle");
-const controlsMenu = document.querySelector(".controls");
+const dropdownToggle = document.querySelector('.dropdown-toggle');
+const controlsMenu = document.querySelector('.controls');
 
-toggle.addEventListener("click", () => {
-  controlsMenu.classList.toggle("show");
+dropdownToggle.addEventListener('click', () => {
+  controlsMenu.classList.toggle('show');
 });
