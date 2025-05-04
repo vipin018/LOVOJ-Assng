@@ -218,7 +218,7 @@ if (frontBtn) {
 if (backBtn) {
   backBtn.addEventListener('click', () => {
     if (window.innerWidth < 768) {
-      camera.position.set(0.5, 1, -5);
+      camera.position.set(0.5, 1, 5);
     } else {
       camera.position.set(0, 1, 3);
     }
@@ -243,24 +243,6 @@ if (rotationToggle) {
       controls.target.set(0, 0, 0);
       controls.update();
     }
-  });
-}
-
-if (texture1Btn) {
-  texture1Btn.addEventListener('click', () => {
-    modelMaterials.forEach((mat) => {
-      mat.map = texture2;
-      mat.needsUpdate = true;
-    });
-  });
-}
-
-if (texture2Btn) {
-  texture2Btn.addEventListener('click', () => {
-    modelMaterials.forEach((mat) => {
-      mat.map = texture3;
-      mat.needsUpdate = true;
-    });
   });
 }
 
