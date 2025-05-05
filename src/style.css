@@ -42,22 +42,23 @@ h1 {
 /* Controls Panel */
 .controls {
   position: absolute;
-  bottom: 1.2rem;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 1.2rem;
+  right: 1.2rem;
   z-index: 10;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 0.75rem;
   background: var(--bg-glass);
   backdrop-filter: blur(14px);
   padding: 1rem 1.25rem;
-  border-radius: 14px;
-  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  border: 2px solid var(--border-color); /* square bracket look */
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  width: max-content;
   max-width: 90vw;
-  justify-content: center;
+  text-align: left;
 }
+
 
 /* Buttons & Inputs */
 .controls button,
@@ -72,6 +73,7 @@ h1 {
   transition: all 0.2s ease;
   cursor: pointer;
   outline: none;
+  width: 100%;
 }
 
 .controls button:hover,
@@ -166,5 +168,29 @@ h1 {
   /* Show the controls when the 'show' class is added */
   .controls.show {
     display: grid; /* Ensuring it remains in grid layout when visible */
+  }
+}
+
+@media (max-width: 600px) {
+  .controls {
+    display: none;
+    position: absolute;
+    top: 1.2rem;
+    right: 1.2rem;
+    grid-template-columns: 1fr;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .controls.show {
+    display: grid;
+  }
+
+  .dropdown-toggle {
+    display: block;
+    position: absolute;
+    top: 1.2rem;
+    right: 1.2rem;
+    transform: none;
   }
 }
