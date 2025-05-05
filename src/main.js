@@ -27,19 +27,27 @@ const defaultCameraPosition = camera.position.clone();
 
 // Lights
 
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
+scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1.25);
 directionalLight.position.set(1, 2, 2);
 directionalLight.target.position.set(0, 0, 0);
 directionalLight.castShadow = true;
+directionalLight.shadow.mapSize.set(1024, 1024);
+directionalLight.shadow.radius = 10;
+directionalLight.shadow.camera.near = 0.5;
+directionalLight.shadow.camera.far = 5;
+directionalLight.shadow.camera.left = -1;
+directionalLight.shadow.camera.right = 1;
+directionalLight.shadow.camera.top = 1;
+directionalLight.shadow.camera.bottom = -1;
+
 scene.add(directionalLight);
 
-const pointLight = new THREE.PointLight(0xffffff, 1, 100, 2);
-pointLight.position.set(0, 1, 0);
+const pointLight = new THREE.PointLight(0xffffff, 1.5, 100, 2);
+pointLight.position.set(0, 1, 1);
 scene.add(pointLight);
-
-const pointLightHelper = new THREE.PointLightHelper(pointLight, 1);
-scene.add(pointLightHelper);
 
 // Resize
 window.addEventListener('resize', () => {
@@ -86,7 +94,8 @@ scene.environment = envMap;
 
 // Plane
 const planeMaterial = new THREE.MeshStandardMaterial({
-  color: 0xaaaaaa,
+  color: "#8D7564", 
+  
   roughness: 0.7,
   metalness: 0.1,
 });
@@ -176,7 +185,7 @@ if (glossyBtn) {
     modelMaterials.forEach((mat) => {
       gsap.to(mat, {
         duration: 1,
-        metalness: 0.2, // keep it 0, it's fabric
+        metalness: 0.05, // keep it 0, it's fabric
         roughness: 0.2, // lower = smoother
         clearcoat: 0.1,
         clearcoatRoughness: 0.1,
@@ -210,7 +219,7 @@ if (roughBtn) {
 
 if (frontBtn) {
   frontBtn.addEventListener('click', () => {
-    const camPos = window.innerWidth < 768 ? { x: 0.5, y: 1, z: 5 } : { x: 0, y: 0, z: 1  };
+    const camPos = window.innerWidth < 768 ? { x: 0, y: 0, z: 1 } : { x: 0, y: 0, z: 1  };
     gsap.to(camera.position, {
       duration: 1,
       ...camPos,
@@ -221,7 +230,7 @@ if (frontBtn) {
 
 if (backBtn) {
   backBtn.addEventListener('click', () => {
-    const camPos = window.innerWidth < 768 ? { x: 0.5, y: 1, z: -2 } : { x: 0, y: 0, z: -1 };
+    const camPos = window.innerWidth < 768 ? { x: 0, y: 0, z: -1 } : { x: 0, y: 0, z: -1 };
     gsap.to(camera.position, {
       duration: 1,
       ...camPos,
@@ -290,11 +299,9 @@ const controlsMenu = document.querySelector('.controls');
 dropdownToggle.addEventListener('click', () => {
   if (window.innerWidth < 768) {
     controlsMenu.classList.toggle('show'); // Toggle for mobile view
+    if (controlsMenu.classList.contains('show')) {
+      dropdownToggle.style.display = 'none'; // Hide the button once controls are shown
+    }
   }
 });
-
-// On desktop, show the controls by default (no toggle needed)
-if (window.innerWidth >= 768) {
-  controlsMenu.classList.add('show');
-}
 
