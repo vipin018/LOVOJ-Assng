@@ -1,12 +1,16 @@
+// --- Cleaned & Improved T-Shirt Viewer Code ---
+
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import gsap from 'gsap';
+
+// --- Scene Setup ---
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xafafaf);
+scene.background = new THREE.Color(0xf0f0f0);
 
 const canvas = document.querySelector('#canvas');
-const renderer = new THREE.WebGLRenderer({ canvas });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -18,109 +22,71 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 scene.add(camera);
 
 const isMobile = window.innerWidth < 768;
-const defaultDesktopCamPos = new THREE.Vector3(0.5, 1, -4);
-const defaultMobileCamPos = new THREE.Vector3(0.5, 1, -5);
+const defaultCamPos = isMobile ? new THREE.Vector3(0, 0.5, 2) : new THREE.Vector3(0, 0.5, 1.5);
+camera.position.copy(defaultCamPos);
 
-// set initial camera pos
-camera.position.copy(isMobile ? defaultMobileCamPos : defaultDesktopCamPos);
-const defaultCameraPosition = camera.position.clone();
-
-// Lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+// --- Lights ---
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(1, 2, 2);
-directionalLight.target.position.set(0, 0, 0);
-directionalLight.castShadow = true;
-scene.add(directionalLight);
+const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+dirLight.position.set(2, 3, 4);
+dirLight.castShadow = true;
+scene.add(dirLight);
 
-// Resize
-window.addEventListener('resize', () => {
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-});
+// --- Ground Plane ---
+const plane = new THREE.Mesh(
+  new THREE.PlaneGeometry(5, 5),
+  new THREE.MeshStandardMaterial({ color: 0xe0e0e0, roughness: 0.8 })
+);
+plane.rotation.x = -Math.PI / 2;
+plane.position.y = -0.5;
+plane.receiveShadow = true;
+scene.add(plane);
 
-// Fullscreen toggle
-window.addEventListener('dblclick', () => {
-  if (!document.fullscreenElement && canvas.requestFullscreen) {
-    canvas.requestFullscreen();
-  } else if (document.fullscreenElement) {
-    document.exitFullscreen();
-  }
-});
+// --- Controls ---
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
 
-// Texture loading
-const textureLoader = new THREE.TextureLoader();
-
-const texture = textureLoader.load('/textures/texture2.png');
-texture.colorSpace = THREE.SRGBColorSpace;
-texture.wrapS = THREE.RepeatWrapping;
-texture.wrapT = THREE.RepeatWrapping;
-texture.repeat.set(1, 1);
-texture.center.set(0.5, 0.5);
-
-const texture2 = textureLoader.load('/textures/texture2.png');
-texture2.colorSpace = THREE.SRGBColorSpace;
-texture2.wrapS = THREE.RepeatWrapping;
-texture2.wrapT = THREE.RepeatWrapping;
-texture2.repeat.set(1, 1);
-texture2.center.set(0.5, 0.5);
-
-
-// Env Map
-const cubeTextureLoader = new THREE.CubeTextureLoader();
-const envMap = cubeTextureLoader.load([
+// --- Environment Map ---
+const envMap = new THREE.CubeTextureLoader().load([
   '/2/px.jpg', '/2/nx.jpg',
   '/2/py.jpg', '/2/ny.jpg',
   '/2/pz.jpg', '/2/nz.jpg',
 ]);
 scene.environment = envMap;
 
-// Plane
-const planeMaterial = new THREE.MeshStandardMaterial({
-  color: 0xaaaaaa,
-  roughness: 0.7,
-  metalness: 0.1,
+// --- Textures ---
+const textureLoader = new THREE.TextureLoader();
+const [defaultTexture, altTexture] = [
+  textureLoader.load('/textures/texture3.png'),
+  textureLoader.load('/textures/texture2.png'),
+];
+
+[defaultTexture, altTexture].forEach(tex => {
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.center.set(0.5, 0.5);
+  tex.repeat.set(1, 1);
 });
-const plane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), planeMaterial);
-plane.rotation.x = -Math.PI / 2;
-plane.position.y = -0.5;
-plane.receiveShadow = true;
-scene.add(plane);
 
-// Controls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-
-// Variables
+// --- Load Model ---
 let model;
 const modelMaterials = [];
-let shadowsOn = true;
-let allowRotation = true;
-
-// Load model
-const loader = new GLTFLoader();
-loader.load('/model/can.glb', (gltf) => {
+new GLTFLoader().load('/model/tshirt.glb', (gltf) => {
   model = gltf.scene;
   model.scale.set(0.5, 0.5, 0.5);
   model.position.set(0, -0.5, 0);
+
   model.traverse((child) => {
     if (child.isMesh) {
-      child.castShadow = true;
-      child.receiveShadow = true;
+      child.castShadow = child.receiveShadow = true;
       child.material = new THREE.MeshPhysicalMaterial({
         color: 0xffffff,
-        metalness: 0.5,
-        roughness: 0.7,
-        map: texture,
-        envMap: envMap,
-        envMapIntensity: 1.2,
-        clearcoat: 0.4,
-        clearcoatRoughness: 0.1,
-        reflectivity: 0.5,
-        ior: 1.4,
+        map: defaultTexture,
+        envMap,
+        roughness: 0.8,
+        metalness: 0,
       });
       modelMaterials.push(child.material);
     }
@@ -129,7 +95,7 @@ loader.load('/model/can.glb', (gltf) => {
   scene.add(model);
 });
 
-// Animate
+// --- Animation Loop ---
 const animate = () => {
   controls.update();
   renderer.render(scene, camera);
@@ -137,153 +103,146 @@ const animate = () => {
 };
 animate();
 
-// UI Elements
-const toggleBtn = document.getElementById('toggleShadows');
-const glossyBtn = document.getElementById('increaseGloss');
-const roughBtn = document.getElementById('increaseRough');
-const frontBtn = document.getElementById('frontView');
-const backBtn = document.getElementById('backView');
-const colorInput = document.getElementById('colorInput');
-const rotationToggle = document.getElementById('rotationToggle');
-const tileXInput = document.getElementById('tileX');
-const tileYInput = document.getElementById('tileY');
+// --- Responsiveness ---
+window.addEventListener('resize', () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+});
+
+window.addEventListener('dblclick', () => {
+  if (!document.fullscreenElement) {
+    canvas.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+// --- UI Bindings ---
+const UI = (id) => document.getElementById(id);
+
+UI('toggleShadows')?.addEventListener('click', () => {
+  const toggle = !renderer.shadowMap.enabled;
+  renderer.shadowMap.enabled = toggle;
+  dirLight.castShadow = toggle;
+  plane.receiveShadow = toggle;
+  model?.traverse(child => {
+    if (child.isMesh) {
+      child.castShadow = child.receiveShadow = toggle;
+    }
+  });
+});
+
+UI('increaseGloss')?.addEventListener('click', () => {
+  modelMaterials.forEach(mat => {
+    gsap.to(mat, {
+      roughness: 0.2,
+      clearcoat: 0.2,
+      reflectivity: 0.1,
+      envMapIntensity: 1.5,
+      duration: 0.8
+    });
+  });
+});
+
+UI('increaseRough')?.addEventListener('click', () => {
+  modelMaterials.forEach(mat => {
+    gsap.to(mat, {
+      roughness: 1.0,
+      clearcoat: 0.0,
+      reflectivity: 0.0,
+      envMapIntensity: 0.5,
+      duration: 0.8
+    });
+  });
+});
+
+UI('frontView')?.addEventListener('click', () => {
+  gsap.to(camera.position, {
+    x: 0, y: 1, z: 3,
+    duration: 1,
+    onUpdate: () => controls.update()
+  });
+});
+
+UI('backView')?.addEventListener('click', () => {
+  gsap.to(camera.position, {
+    x: 0, y: 1, z: -2,
+    duration: 1,
+    onUpdate: () => controls.update()
+  });
+});
+
+UI('colorInput')?.addEventListener('input', (e) => {
+  modelMaterials.forEach(mat => mat.color.set(e.target.value));
+});
+
+UI('rotationToggle')?.addEventListener('click', () => {
+  controls.enableRotate = !controls.enableRotate;
+  if (!controls.enableRotate) {
+    gsap.to(camera.position, {
+      x: defaultCamPos.x,
+      y: defaultCamPos.y,
+      z: defaultCamPos.z,
+      duration: 1,
+      onUpdate: () => controls.update()
+    });
+  }
+});
+
+// Get the slider values and update the texture's repeat property
+const tileX = document.getElementById('tileX');
+const tileY = document.getElementById('tileY');
+
+tileX.addEventListener('input', () => {
+  texture.repeat.x = tileX.value;
+});
+
+tileY.addEventListener('input', () => {
+  texture.repeat.y = tileY.value;
+});
+
+
 const rotationInput = document.getElementById('rotation');
-const texture1Btn = document.getElementById('texture1Btn');
-const texture2Btn = document.getElementById('texture2Btn');
 
-// Event Listeners
-if (toggleBtn) {
-  toggleBtn.addEventListener('click', () => {
-    shadowsOn = !shadowsOn;
-    renderer.shadowMap.enabled = shadowsOn;
-    directionalLight.castShadow = shadowsOn;
-    plane.receiveShadow = shadowsOn;
-    if (model) {
-      model.traverse((child) => {
-        if (child.isMesh) {
-          child.castShadow = shadowsOn;
-          child.receiveShadow = shadowsOn;
-        }
+rotationInput.addEventListener('input', () => {
+  texture.center.set(0.5, 0.5); // Ensuring the texture rotates around its center
+  texture.rotation = rotationInput.value;
+});
+
+UI('texture1Btn')?.addEventListener('click', () => {
+  modelMaterials.forEach(mat => { mat.map = defaultTexture; mat.needsUpdate = true; });
+});
+
+UI('texture2Btn')?.addEventListener('click', () => {
+  modelMaterials.forEach(mat => { mat.map = altTexture; mat.needsUpdate = true; });
+});
+
+UI('uploadTexture')?.addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const texture = new THREE.Texture(img);
+      texture.needsUpdate = true;
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(1, 1);
+      texture.center.set(0.5, 0.5);
+      modelMaterials.forEach(mat => {
+        mat.map = texture;
+        mat.needsUpdate = true;
       });
-    }
-  });
-}
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+});
 
-if (glossyBtn) {
-  glossyBtn.addEventListener('click', () => {
-    modelMaterials.forEach((mat) => {
-      gsap.to(mat, {
-        duration: 1,
-        metalness: 0.7,
-        roughness: 0.2,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.0,
-        reflectivity: 1.0,
-        ior: 1.6,
-        envMapIntensity: 2.0,
-        onUpdate: () => { mat.needsUpdate = true; }
-      });
-    });
-  });
-}
-
-if (roughBtn) {
-  roughBtn.addEventListener('click', () => {
-    modelMaterials.forEach((mat) => {
-      gsap.to(mat, {
-        duration: 1,
-        metalness: 0.0,
-        roughness: 1.0,
-        clearcoat: 0.0,
-        clearcoatRoughness: 1.0,
-        reflectivity: 0.0,
-        ior: 1.0,
-        envMapIntensity: 0.5,
-        onUpdate: () => { mat.needsUpdate = true; }
-      });
-    });
-  });
-}
-
-
-if (frontBtn) {
-  frontBtn.addEventListener('click', () => {
-    const camPos = window.innerWidth < 768 ? { x: 0.5, y: 1, z: -5 } : { x: 0, y: 1, z: -5 };
-    gsap.to(camera.position, {
-      duration: 1,
-      ...camPos,
-      onUpdate: () => controls.update()
-    });
-  });
-}
-
-if (backBtn) {
-  backBtn.addEventListener('click', () => {
-    const camPos = window.innerWidth < 768 ? { x: 0.5, y: 1, z: 5 } : { x: 0, y: 1, z: 5 };
-    gsap.to(camera.position, {
-      duration: 1,
-      ...camPos,
-      onUpdate: () => controls.update()
-    });
-  });
-}
-
-
-if (colorInput) {
-  colorInput.addEventListener('input', (e) => {
-    modelMaterials.forEach((mat) => {
-      gsap.to(mat.color, {
-        duration: 0.5,
-        ...new THREE.Color(e.target.value)
-      });
-    });
-  });
-}
-
-
-if (rotationToggle) {
-  rotationToggle.addEventListener('click', () => {
-    allowRotation = !allowRotation;
-    controls.enableRotate = allowRotation;
-    if (!allowRotation) {
-      const pos = window.innerWidth < 768 ? defaultMobileCamPos : defaultDesktopCamPos;
-      gsap.to(camera.position, {
-        duration: 1,
-        x: pos.x, y: pos.y, z: pos.z,
-        onUpdate: () => controls.update()
-      });
-      gsap.to(controls.target, {
-        duration: 1,
-        x: 0, y: 0, z: 0,
-        onUpdate: () => controls.update()
-      });
-    }
-  });
-}
-
-
-if (tileXInput) {
-  tileXInput.addEventListener('input', () => {
-    gsap.to(texture.repeat, { duration: 0.5, x: parseFloat(tileXInput.value) });
-  });
-}
-
-if (tileYInput) {
-  tileYInput.addEventListener('input', () => {
-    gsap.to(texture.repeat, { duration: 0.5, y: parseFloat(tileYInput.value) });
-  });
-}
-
-if (rotationInput) {
-  rotationInput.addEventListener('input', () => {
-    gsap.to(texture, { duration: 0.5, rotation: parseFloat(rotationInput.value) });
-  });
-}
-
-
-const dropdownToggle = document.querySelector('.dropdown-toggle');
-const controlsMenu = document.querySelector('.controls');
-
-dropdownToggle.addEventListener('click', () => {
-  controlsMenu.classList.toggle('show');
+// --- Dropdown UI ---
+UI('dropdownToggle')?.addEventListener('click', () => {
+  document.querySelector('.controls')?.classList.toggle('show');
 });
