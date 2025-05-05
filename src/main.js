@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import gsap from 'gsap';
+
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xafafaf);
 
@@ -18,12 +19,29 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 scene.add(camera);
 
 const isMobile = window.innerWidth < 768;
-const defaultDesktopCamPos = new THREE.Vector3(0, 0, 1);
+const defaultDesktopCamPos = new THREE.Vector3(-0.25, 0, 0.85);
 const defaultMobileCamPos = new THREE.Vector3(0, 0, 1);
 
 // set initial camera pos
 camera.position.copy(isMobile ? defaultMobileCamPos : defaultDesktopCamPos);
 const defaultCameraPosition = camera.position.clone();
+
+// loader
+const loadingManager = new THREE.LoadingManager();
+const loaderElement = document.getElementById('loader');
+
+loadingManager.onLoad = () => {
+  // Fade out loader when everything's loaded
+  loaderElement.classList.add('fade-out');
+  setTimeout(() => {
+    loaderElement.style.display = 'none'; // Let the fade-out animation finish before hiding
+  }, 1000); // 1000ms = time for the fade-out animation to complete
+};
+
+// Texture loading
+const textureLoader = new THREE.TextureLoader(loadingManager);
+const cubeTextureLoader = new THREE.CubeTextureLoader(loadingManager);
+const gltfLoader = new GLTFLoader(loadingManager);
 
 // Lights
 
@@ -45,9 +63,11 @@ directionalLight.shadow.camera.bottom = -1;
 
 scene.add(directionalLight);
 
-const pointLight = new THREE.PointLight(0xffffff, 1.5, 100, 2);
-pointLight.position.set(0, 1, 1);
-scene.add(pointLight);
+const spotLight = new THREE.SpotLight(0xffffff, 1.5);
+spotLight.position.set(0, 2.5, 1);
+spotLight.angle = Math.PI / 6;
+spotLight.penumbra = 0.3;
+scene.add(spotLight);
 
 // Resize
 window.addEventListener('resize', () => {
@@ -66,25 +86,15 @@ window.addEventListener('dblclick', () => {
 });
 
 // Texture loading
-const textureLoader = new THREE.TextureLoader();
-
 const texture = textureLoader.load('/textures/texture2.png');
 texture.colorSpace = THREE.SRGBColorSpace;
 texture.wrapS = THREE.RepeatWrapping;
 texture.wrapT = THREE.RepeatWrapping;
 texture.repeat.set(1, 1);
 texture.center.set(0.5, 0.5);
-
-const texture2 = textureLoader.load('/textures/texture2.png');
-texture2.colorSpace = THREE.SRGBColorSpace;
-texture2.wrapS = THREE.RepeatWrapping;
-texture2.wrapT = THREE.RepeatWrapping;
-texture2.repeat.set(1, 1);
-texture2.center.set(0.5, 0.5);
-
+texture.rotation = 0;
 
 // Env Map
-const cubeTextureLoader = new THREE.CubeTextureLoader();
 const envMap = cubeTextureLoader.load([
   '/2/px.jpg', '/2/nx.jpg',
   '/2/py.jpg', '/2/ny.jpg',
@@ -92,18 +102,47 @@ const envMap = cubeTextureLoader.load([
 ]);
 scene.environment = envMap;
 
-// Plane
-const planeMaterial = new THREE.MeshStandardMaterial({
-  color: "#8D7564", 
-  
-  roughness: 0.7,
+const roomMaterial = new THREE.MeshStandardMaterial({
+  color: "#8D7564",
+  roughness: 0.8,
   metalness: 0.1,
+  side: THREE.DoubleSide // faces inward
 });
-const plane = new THREE.Mesh(new THREE.PlaneGeometry(5, 5), planeMaterial);
-plane.rotation.x = -Math.PI / 2;
-plane.position.y = -0.5;
-plane.receiveShadow = true;
-scene.add(plane);
+
+const roomSize = 3;
+
+// Floor (you already have this, but just in case)
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(roomSize, roomSize), roomMaterial);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = -0.5;
+floor.receiveShadow = true;
+scene.add(floor);
+
+// Back Wall
+const backWall = new THREE.Mesh(new THREE.PlaneGeometry(roomSize, roomSize), roomMaterial);
+backWall.position.z = -roomSize / 2;
+backWall.position.y = roomSize / 2 - 0.5;
+scene.add(backWall);
+
+// Left Wall
+const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(roomSize, roomSize), roomMaterial);
+leftWall.rotation.y = Math.PI / 2;
+leftWall.position.x = -roomSize / 2;
+leftWall.position.y = roomSize / 2 - 0.5;
+scene.add(leftWall);
+
+// Right Wall
+const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(roomSize, roomSize), roomMaterial);
+rightWall.rotation.y = -Math.PI / 2;
+rightWall.position.x = roomSize / 2;
+rightWall.position.y = roomSize / 2 - 0.5;
+scene.add(rightWall);
+
+// Ceiling
+const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(roomSize, roomSize), roomMaterial);
+ceiling.rotation.x = Math.PI / 2;
+ceiling.position.y = roomSize - 0.5;
+scene.add(ceiling);
 
 // Controls
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -116,8 +155,7 @@ let shadowsOn = true;
 let allowRotation = true;
 
 // Load model
-const loader = new GLTFLoader();
-loader.load('/model/tshirt.glb', (gltf) => {
+gltfLoader.load('/model/tshirt.glb', (gltf) => {
   model = gltf.scene;
   model.scale.set(0.5, 0.5, 0.5);
   model.position.set(0, -0.5, 0);
@@ -159,8 +197,6 @@ const rotationToggle = document.getElementById('rotationToggle');
 const tileXInput = document.getElementById('tileX');
 const tileYInput = document.getElementById('tileY');
 const rotationInput = document.getElementById('rotation');
-const texture1Btn = document.getElementById('texture1Btn');
-const texture2Btn = document.getElementById('texture2Btn');
 
 // Event Listeners
 if (toggleBtn) {
@@ -168,7 +204,6 @@ if (toggleBtn) {
     shadowsOn = !shadowsOn;
     renderer.shadowMap.enabled = shadowsOn;
     directionalLight.castShadow = shadowsOn;
-    plane.receiveShadow = shadowsOn;
     if (model) {
       model.traverse((child) => {
         if (child.isMesh) {
@@ -215,7 +250,6 @@ if (roughBtn) {
     });
   });
 }
-
 
 if (frontBtn) {
   frontBtn.addEventListener('click', () => {
