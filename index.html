@@ -18,25 +18,25 @@
       <button class="dropdown-toggle">⚙️ Controls</button>
       <div class="controls">
         
-        <!-- Shadows -->
+  
         <button id="toggleShadows">Toggle Shadows</button>
 
-        <!-- Glossy / Rough -->
+
         <button id="increaseGloss">Glossy</button>
         <button id="increaseRough">Rough</button>
 
-        <!-- Front / Back View -->
+    
         <button id="frontView">Front View</button>
         <button id="backView">Back View</button>
 
-        <!-- Color Customizer -->
+   
         <div>
           <label for="colorInput">Model Color:</label>
           <input type="text" id="colorInput" value="#ffffff" placeholder="#ff5733 or red" />
         </div>
         
 
-        <!-- Texture Tiling Controls -->
+    
         <div>
           <label for="tileX">Tile X:</label>
           <input type="range" id="tileX" min="1" max="10" step="0.1" value="1" />
@@ -46,22 +46,21 @@
           <input type="range" id="tileY" min="1" max="10" step="0.1" value="1" />
         </div>
 
-        <!-- Texture Rotation -->
+   
         <div>
           <label for="rotation">Texture Rotation (radians):</label>
           <input type="range" id="rotation" min="0" max="6.28" step="0.01" value="0" />
         </div>
 
-        <!-- Orbit Rotation Toggle -->
         <button id="rotationToggle">Toggle Rotation</button>
 
       </div>
     </div>
 
-    <!-- Three.js Canvas -->
+
     <canvas id="canvas"></canvas>
 
-    <!-- Main JS -->
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

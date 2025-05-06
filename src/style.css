@@ -1,5 +1,5 @@
 :root {
-  --accent: #101212; /* bright but classy cyan */
+  --accent: #101212;
   --bg-glass: rgba(255, 255, 255, 0.07);
   --bg-dark: #121212;
   --border-color: rgba(102, 224, 255, 0.2);
@@ -7,7 +7,7 @@
   --active-bg: rgba(102, 224, 255, 0.2);
 }
 
-/* Reset & Base Styles */
+
 * {
   margin: 0;
   padding: 0;
@@ -23,7 +23,7 @@ html, body {
   overflow: hidden;
 }
 
-/* Canvas Fullscreen */
+
 canvas {
   position: fixed;
   top: 0;
@@ -39,7 +39,7 @@ h1 {
   margin-top: 1rem;
 }
 
-/* Controls Panel */
+
 .controls {
   position: absolute;
   top: 1.2rem;
@@ -52,7 +52,7 @@ h1 {
   backdrop-filter: blur(14px);
   padding: 1rem 1.25rem;
   border-radius: 8px;
-  border: 2px solid var(--border-color); /* square bracket look */
+  border: 2px solid var(--border-color);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   width: max-content;
   max-width: 90vw;
@@ -60,7 +60,7 @@ h1 {
 }
 
 
-/* Buttons & Inputs */
+
 .controls button,
 .controls input[type="range"],
 .controls input[type="text"] {
@@ -94,7 +94,7 @@ h1 {
   text-align: center;
 }
 
-/* Slider Custom Thumb */
+
 .controls input[type="range"] {
   width: 120px;
   appearance: none;
@@ -113,7 +113,7 @@ h1 {
   box-shadow: 0 0 6px var(--accent);
 }
 
-/* Dropdown Toggle */
+
 .dropdown-toggle {
   display: none;
   position: absolute;
@@ -137,17 +137,16 @@ h1 {
 }
 
 @media (max-width: 600px) {
-  /* Controls should be displayed in two columns */
+
   .controls {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Two equal columns */
-    grid-gap: 1rem; /* Space between the columns */
-    width: 100%; /* Make it take full width */
+    grid-template-columns: repeat(2, 1fr); 
+    grid-gap: 1rem; 
+    width: 100%; 
     max-height: 80vh;
     overflow-y: auto;
   }
 
-  /* Make each button/input take full width of its column */
   .controls button,
   .controls input[type="range"],
   .controls input[type="text"] {
@@ -155,19 +154,19 @@ h1 {
     font-size: 0.85rem;
   }
 
-  /* Dropdown Toggle should be visible on mobile */
+
   .dropdown-toggle {
     display: block;
   }
 
-  /* Hide the controls by default on mobile */
+
   .controls {
     display: none;
   }
 
-  /* Show the controls when the 'show' class is added */
+
   .controls.show {
-    display: grid; /* Ensuring it remains in grid layout when visible */
+    display: grid; 
   }
 }
 
@@ -177,7 +176,7 @@ h1 {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    grid-template-columns: 1fr; /* Single column */
+    grid-template-columns: 1fr; 
     max-height: 300px;
     width: 300px;
     padding: 1rem;
@@ -224,7 +223,7 @@ h1 {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: #111; /* or brand color */
+  background: #111; 
   display: flex;
   align-items: center;
   justify-content: center;
