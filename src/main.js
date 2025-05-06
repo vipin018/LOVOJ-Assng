@@ -22,20 +22,19 @@ const isMobile = window.innerWidth < 768;
 const defaultDesktopCamPos = new THREE.Vector3(-0.25, 0, 0.85);
 const defaultMobileCamPos = new THREE.Vector3(0, 0, 1);
 
-// set initial camera pos
 camera.position.copy(isMobile ? defaultMobileCamPos : defaultDesktopCamPos);
-const defaultCameraPosition = camera.position.clone();
+
 
 // loader
 const loadingManager = new THREE.LoadingManager();
 const loaderElement = document.getElementById('loader');
 
 loadingManager.onLoad = () => {
-  // Fade out loader when everything's loaded
+
   loaderElement.classList.add('fade-out');
   setTimeout(() => {
-    loaderElement.style.display = 'none'; // Let the fade-out animation finish before hiding
-  }, 1000); // 1000ms = time for the fade-out animation to complete
+    loaderElement.style.display = 'none';
+  }, 1000); 
 };
 
 // Texture loading
@@ -106,12 +105,12 @@ const roomMaterial = new THREE.MeshStandardMaterial({
   color: "#8D7564",
   roughness: 0.8,
   metalness: 0.1,
-  side: THREE.DoubleSide // faces inward
+  side: THREE.DoubleSide 
 });
 
 const roomSize = 3;
 
-// Floor (you already have this, but just in case)
+
 const floor = new THREE.Mesh(new THREE.PlaneGeometry(roomSize, roomSize), roomMaterial);
 floor.rotation.x = -Math.PI / 2;
 floor.position.y = -0.5;
@@ -220,8 +219,8 @@ if (glossyBtn) {
     modelMaterials.forEach((mat) => {
       gsap.to(mat, {
         duration: 1,
-        metalness: 0.05, // keep it 0, it's fabric
-        roughness: 0.2, // lower = smoother
+        metalness: 0.05, 
+        roughness: 0.2, 
         clearcoat: 0.1,
         clearcoatRoughness: 0.1,
         reflectivity: 0.05,
@@ -238,8 +237,8 @@ if (roughBtn) {
     modelMaterials.forEach((mat) => {
       gsap.to(mat, {
         duration: 1,
-        metalness: 0.0, // again, it’s not Iron Man’s suit
-        roughness: 1.0, // max roughness = very matte
+        metalness: 0.0, 
+        roughness: 1.0, 
         clearcoat: 0.0,
         clearcoatRoughness: 1.0,
         reflectivity: 0.0,
@@ -332,10 +331,9 @@ const controlsMenu = document.querySelector('.controls');
 // Toggle the dropdown for mobile view, always visible on desktop
 dropdownToggle.addEventListener('click', () => {
   if (window.innerWidth < 768) {
-    controlsMenu.classList.toggle('show'); // Toggle for mobile view
+    controlsMenu.classList.toggle('show'); 
     if (controlsMenu.classList.contains('show')) {
-      dropdownToggle.style.display = 'none'; // Hide the button once controls are shown
+      dropdownToggle.style.display = 'none'; 
     }
   }
 });
-
