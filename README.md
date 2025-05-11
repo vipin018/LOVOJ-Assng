@@ -1,6 +1,6 @@
-# 🥫 Three.js Can Viewer
+# 🥫 Three.js Assngs
 
-An interactive 3D can viewer built using **Three.js**, with real-time customization controls for color, gloss, roughness, texture tiling, and more. Fully controllable via a sleek UI panel — like Blender, but in the browser.
+An interactive 3D product viewer built using **Three.js**, with real-time customization controls for color, gloss, roughness, texture tiling, and more. Fully controllable via a sleek UI panel — like Blender, but in the browser.
 ---
 
 ## 🚀 Features
